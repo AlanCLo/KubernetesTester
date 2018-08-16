@@ -3,7 +3,7 @@ Just testing how kubernetes works
 
 https://github.com/kubernetes/minikube
 
-Refer to [akefile](Makefile).
+Refer to [Makefile](Makefile).
 
 # postgres demo
 Refer to [postgres.yaml](postgres.yaml)
