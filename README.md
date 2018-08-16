@@ -3,10 +3,10 @@ Just testing how kubernetes works
 
 https://github.com/kubernetes/minikube
 
-Refer to [[Makefile]].
+Refer to [akefile](Makefile).
 
 # postgres demo
-Refer to [[postgres.yaml]]
+Refer to [postgres.yaml](postgres.yaml)
 
 Deploys a postgresql using danieldent/postgres-replication image. Check out the dockerhub and github page for its construction.
 
