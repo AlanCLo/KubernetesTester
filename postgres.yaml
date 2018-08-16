@@ -24,15 +24,15 @@ apiVersion: apps/v1
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-slave
+  name: postgres-replicas
   labels:
-    app: postgres-slave
+    app: postgres-replicas
 spec:
   ports:
   - port: 5432
   clusterIP: None
   selector:
-    app: postgres-slave
+    app: postgres-replicas
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -93,25 +93,25 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: postgres-slave
+  name: postgres-replicas
 spec:
-  serviceName: "postgres-slave"
+  serviceName: "postgres-replicas"
   replicas: 2
   selector:
     matchLabels:
-      app: postgres-slave
+      app: postgres-replicas
   template:
     metadata:
       labels:
-        app: postgres-slave
+        app: postgres-replicas
     spec:
       containers:
-      - name: postgres-slave
+      - name: postgres-replicas
         image: danieldent/postgres-replication
         ports:
         - containerPort: 5432
         volumeMounts:
-        - name: pgdata-slave
+        - name: pgdata-replicas
           mountPath: /var/lib/postgresql/data/pgdata
         env:
         - name: POSTGRES_USER
@@ -138,7 +138,7 @@ spec:
           timeoutSeconds: 1
   volumeClaimTemplates:
   - metadata:
-      name: pgdata-slave
+      name: pgdata-replicas
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:

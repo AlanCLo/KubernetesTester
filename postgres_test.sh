@@ -4,7 +4,7 @@ IMAGE="danieldent/docker-postgres-replication"
 PGPASSWORD="admin123"
 
 MASTER="postgres"
-SLAVE="postgres-slave"
+SLAVE="postgres-replicas"
 
 KUBECMD="kubectl run pclient --image="$IMAGE" -i -t --rm --restart=Never --env="PGPASSWORD=$PGPASSWORD" --"
 PSQL="psql -U postgres"
@@ -17,7 +17,7 @@ echo
 _header "INFO: you can run psql by using once off container through kubectl as well."
 _header "For master:"
 echo "$KUBECMD $PSQL -h $MASTER"
-_header "For slave (read-only):"
+_header "For replicas (read-only):"
 echo "$KUBECMD $PSQL -h $SLAVE"
 echo
 echo
@@ -46,6 +46,6 @@ $KUBECMD $PSQL -h $MASTER testdb -c "INSERT INTO mytable(id) VALUES(3);"
 
 
 echo
-_header "TEST: Ask slave to return mytable data."
+_header "TEST: Ask replicas to return mytable data."
 
 $KUBECMD $PSQL -h $SLAVE testdb -c "SELECT * FROM mytable;"

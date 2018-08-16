@@ -8,10 +8,10 @@ kubectl get pvc -l app=postgres -o go-template --template '{{range .items}}{{.sp
 kubectl get pvc -l app=postgres -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs kubectl delete pvc
 
 
-kubectl delete service postgres-slave
-kubectl delete sts postgres-slave
+kubectl delete service postgres-replicas
+kubectl delete sts postgres-replicas
 
-kubectl get pvc -l app=postgres-slave -o go-template --template '{{range .items}}{{.spec.volumeName}}{{"\n"}}{{end}}' | xargs kubectl delete pv
-kubectl get pvc -l app=postgres-slave -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs kubectl delete pvc
+kubectl get pvc -l app=postgres-replicas -o go-template --template '{{range .items}}{{.spec.volumeName}}{{"\n"}}{{end}}' | xargs kubectl delete pv
+kubectl get pvc -l app=postgres-replicas -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs kubectl delete pvc
 
 kubectl delete secret postgres-password

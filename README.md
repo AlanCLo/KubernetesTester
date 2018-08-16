@@ -23,7 +23,7 @@ make show
 sh postgres_test.sh
 
 # Scale replicas
-kubectl scale sts postgres-slave --replicas=5
+kubectl scale sts postgres-replicas --replicas=5
 
 # Un-deploy it
 sh postgres_clean.sh
