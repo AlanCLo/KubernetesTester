@@ -1,21 +1,33 @@
+### A bunch of shortcuts to kubectl and minikube commands
+#
+# Assumes you have minikube installed and started
+# https://github.com/kubernetes/minikube
 
-.PHONY: sanity_check deploy clean
 
+# Try minikube start if it isn't
 sanity_check:
-	kubectl cluster-info
+	@echo "\033[1;31mChecking kube is alive\033[0m"
+	kubectl cluster-info 
 
-deploy:
-	kubectl apply -f postgres.yaml
+# Show all types of resources
+show: show-services show-deployments show-sts show-pods show-pvc show-pv show-secret
 
-enter%:
-	kubectl exec -it postgres-sts-$(subst enter,,$@) /bin/bash
+# Show a specific resource
+show-%:
+	@echo "\033[1;31mkubectl get $(subst show-,,$@)\033[0m"
+	@kubectl get $(subst show-,,$@)
 
-clean:
-	kubectl delete secret postgres-password
-	kubectl delete service postgres
-	kubectl delete sts postgres-sts
+# Deploy a yaml described thing
+%: %.yaml
+	kubectl apply -f $@.yaml
+
+# If its a service with a url, show the url to access it
+url-%:
+	minikube service $(subst url-,,$@) --url
+
+# Enter the container 
+enter-%:
+	kubectl exec -it $(subst enter-,,$@) /bin/bash
 
 
-clean_specifically_the_pv_and_pvc_are_you_really_really_sure:
-	kubectl get pvc -l app=postgres -o go-template --template '{{range .items}}{{.spec.volumeName}}{{"\n"}}{{end}}' | xargs kubectl delete pv
-	kubectl get pvc -l app=postgres -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs kubectl delete pvc
+

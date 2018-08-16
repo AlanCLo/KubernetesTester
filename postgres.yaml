@@ -21,9 +21,23 @@ spec:
     app: postgres
 ---
 apiVersion: apps/v1
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-slave
+  labels:
+    app: postgres-slave
+spec:
+  ports:
+  - port: 5432
+  clusterIP: None
+  selector:
+    app: postgres-slave
+---
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: postgres-sts
+  name: postgres
 spec:
   serviceName: "postgres"
   replicas: 1
@@ -37,21 +51,94 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:10
+        image: danieldent/postgres-replication
         ports:
         - containerPort: 5432
         volumeMounts:
-        - name: conf
-          mountPath: /var/lib/postgresql/data
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data/pgdata
         env:
+        - name: POSTGRES_USER
+          value: postgres
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: postgres-password
               key: postgres-password
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-password
+              key: postgres-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        #- name: REPLICATE_FROM
+        #  value: postgres-0.postgres.default.svc.cluster.local
+        readinessProbe:
+          exec:
+            command: [ "/usr/bin/psql", "-U", "postgres", "-c", "select 1;" ]
+          initialDelaySeconds: 2
+          periodSeconds: 2
+          timeoutSeconds: 1
   volumeClaimTemplates:
   - metadata:
       name: pgdata
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-slave
+spec:
+  serviceName: "postgres-slave"
+  replicas: 2
+  selector:
+    matchLabels:
+      app: postgres-slave
+  template:
+    metadata:
+      labels:
+        app: postgres-slave
+    spec:
+      containers:
+      - name: postgres-slave
+        image: danieldent/postgres-replication
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: pgdata-slave
+          mountPath: /var/lib/postgresql/data/pgdata
+        env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-password
+              key: postgres-password
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-password
+              key: postgres-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: REPLICATE_FROM
+          value: postgres-0.postgres.default.svc.cluster.local
+        readinessProbe:
+          exec:
+            command: [ "/usr/bin/psql", "-U", "postgres", "-c", "select 1;" ]
+          initialDelaySeconds: 2
+          periodSeconds: 2
+          timeoutSeconds: 1
+  volumeClaimTemplates:
+  - metadata:
+      name: pgdata-slave
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
