@@ -7,6 +7,7 @@ data:
   # echo -n "admin123" | base64
   postgres-password: "YWRtaW4xMjM="
 ---
+# The Primary write-able database
 apiVersion: v1
 kind: Service
 metadata:
@@ -20,6 +21,7 @@ spec:
   selector:
     app: postgres
 ---
+# The Replicas which are read-only but scalable
 apiVersion: apps/v1
 apiVersion: v1
 kind: Service
@@ -56,7 +58,7 @@ spec:
         - containerPort: 5432
         volumeMounts:
         - name: pgdata
-          mountPath: /var/lib/postgresql/data/pgdata
+          mountPath: /var/lib/postgresql/data
         env:
         - name: POSTGRES_USER
           value: postgres
@@ -65,15 +67,6 @@ spec:
             secretKeyRef:
               name: postgres-password
               key: postgres-password
-        - name: PGPASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-password
-              key: postgres-password
-        - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
-        #- name: REPLICATE_FROM
-        #  value: postgres-0.postgres.default.svc.cluster.local
         readinessProbe:
           exec:
             command: [ "/usr/bin/psql", "-U", "postgres", "-c", "select 1;" ]
@@ -88,7 +81,6 @@ spec:
       resources:
         requests:
           storage: 1Gi
-
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -112,7 +104,7 @@ spec:
         - containerPort: 5432
         volumeMounts:
         - name: pgdata-replicas
-          mountPath: /var/lib/postgresql/data/pgdata
+          mountPath: /var/lib/postgresql/data
         env:
         - name: POSTGRES_USER
           value: postgres
@@ -121,13 +113,6 @@ spec:
             secretKeyRef:
               name: postgres-password
               key: postgres-password
-        - name: PGPASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-password
-              key: postgres-password
-        - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
         - name: REPLICATE_FROM
           value: postgres-0.postgres.default.svc.cluster.local
         readinessProbe:
