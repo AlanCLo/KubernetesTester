@@ -1,6 +1,7 @@
-#!/bin/bas"h
+#!/bin/bash
 
-IMAGE="danieldent/docker-postgres-replication"
+#IMAGE="danieldent/docker-postgres-replication"
+IMAGE="danieldent/postgres-replication"
 PGPASSWORD="admin123"
 
 MASTER="postgres"
