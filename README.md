@@ -12,8 +12,13 @@ I keep some shortcuts here. Why Make? No reason in particular. Started with the 
 # Does a kubectl get on a most resources
 make show
 
+```
 
+# Building local docker images
 
+```
+eval $(minikube docker-env)
+docker built -t ...
 ```
 
 
