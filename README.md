@@ -21,6 +21,26 @@ eval $(minikube docker-env)
 docker built -t ...
 ```
 
+# Making secrets
+
+Make a fresh one on the commandline
+```
+# You can have as many --from-literal flags as you want in the same command call
+kubectl create secret generic (NAME) --from-literal=(KEY)=(SECRET)
+```
+
+Edit/View the secret in yaml form
+```
+kubectl edit secret (NAME)
+```
+You can copy and paste that as a yaml like I do in this repo but thats probably a bad idea beyond demo purposes.
+*TODO*: Remove secrets from the repo and also get different apps to refer to same secrets
+
+You can also create the secret text outside of k8s by:
+```
+echo -n (SECRET) | base64
+```
+
 
 # postgres
 [postgres.yaml](postgres.yaml)
@@ -67,3 +87,9 @@ Stolon
 # mysql stateful application
 
 https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/
+
+
+# InfluxDB & Grafana
+
+Followed thi tutorial:
+https://opensource.com/article/19/2/deploy-influxdb-grafana-kubernetes
